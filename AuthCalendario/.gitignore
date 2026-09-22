@@ -1,2 +1,4 @@
 node_modules/
+Node_modules/
+.env
 postgres/
