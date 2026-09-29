@@ -1,35 +1,11 @@
 import Salida from './salida.model.js'
-
-// Helper para comparar solo el día (sin horas) al validar duplicados
-const mismoDia = (fechaA, fechaB) => {
-    const a = new Date(fechaA)
-    const b = new Date(fechaB)
-    return (
-        a.getFullYear() === b.getFullYear() &&
-        a.getMonth() === b.getMonth() &&
-        a.getDate() === b.getDate()
-    )
-}
-
-// Valida que el metrólogo no tenga ya una salida ese mismo día
-// (excluye la propia salida cuando se está editando)
-const validarDisponibilidad = async (metrologo, fecha, salidaIdExcluir = null) => {
-    const salidasDelMetrologo = await Salida.find({ metrologo })
-
-    const yaAgendado = salidasDelMetrologo.some((salida) => {
-        if (salidaIdExcluir && salida._id.toString() === salidaIdExcluir) return false
-        return mismoDia(salida.fecha, fecha)
-    })
-
-    if (yaAgendado) {
-        throw new Error(`${metrologo} ya tiene una salida agendada ese día`)
-    }
-}
+import { validarDisponibilidadGlobal } from '../shared/disponibilidad.js'
 
 export const createSalida = async (data, adminId) => {
     const { fecha, cliente, metrologo, hora, ois, observaciones } = data
 
-    await validarDisponibilidad(metrologo, fecha)
+    // Validación de disponibilidad global entre colecciones
+    await validarDisponibilidadGlobal(metrologo, fecha)
 
     const salida = await Salida.create({
         fecha,
@@ -74,9 +50,9 @@ export const updateSalida = async (id, data) => {
     const nuevoMetrologo = data.metrologo ?? salida.metrologo
     const nuevaFecha = data.fecha ?? salida.fecha
 
-    // Solo revalidamos disponibilidad si cambió el metrólogo o la fecha
+    // Solo revalidamos disponibilidad global si cambió el metrólogo o la fecha
     if (data.metrologo || data.fecha) {
-        await validarDisponibilidad(nuevoMetrologo, nuevaFecha, id)
+        await validarDisponibilidadGlobal(nuevoMetrologo, nuevaFecha, id, 'Salida')
     }
 
     const actualizada = await Salida.findByIdAndUpdate(
