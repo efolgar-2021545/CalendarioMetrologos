@@ -16,3 +16,9 @@ export const fechaLarga = (fechaISO) =>
         month: 'long',
         year: 'numeric'
     })
+
+// "2026-11-05T00:00:00.000Z" → "05/11/2026"
+export const fechaCorta = (fechaISO) => {
+    const [anio, mes, dia] = diaDeRegistro(fechaISO).split('-')
+    return `${dia}/${mes}/${anio}`
+}

@@ -7,6 +7,8 @@ import ProtectedRoute from './routes/ProtectedRoute.jsx'
 import Login from './pages/Login.jsx'
 import CalendarioUsuario from './pages/CalendarioUsuario.jsx'
 import AdminPanel from './pages/AdminPanel.jsx'
+import Historial from './pages/Historial.jsx'
+import Metrologos from './pages/Metrologos.jsx'
 
 // La ruta "/" manda a cada quien a su pantalla
 const RedirectInicio = () => {
@@ -34,6 +36,24 @@ const App = () => {
         element={
           <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
             <AdminPanel />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin/historial"
+        element={
+          <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
+            <Historial />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin/metrologos"
+        element={
+          <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
+            <Metrologos />
           </ProtectedRoute>
         }
       />
