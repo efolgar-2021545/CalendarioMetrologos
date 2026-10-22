@@ -29,7 +29,35 @@ const enviarCorreo = async (metrologo, datos, tipoCalendario) => {
         html: `
             <h2>Se te agendó una ${nombreCalendario}</h2>
             <p><strong>Cliente:</strong> ${datos.cliente}</p>
-            <p><strong>Fecha:</strong> ${new Date(datos.fecha).toLocaleDateString('es-GT')}</p>
+            <p><strong>Fecha:</strong> ${new Date(datos.fecha).toLocaleDateString('es-GT', { timeZone: 'UTC' })}</p>
+            <p><strong>Hora:</strong> ${datos.hora}</p>
+            <p><strong>OIS:</strong> ${datos.ois}</p>
+            <p><strong>Observaciones:</strong> ${datos.observaciones || 'Sin observaciones'}</p>
+        `
+    })
+}
+
+// Correo de recordatorio (lo usa el módulo de recordatorios)
+export const enviarRecordatorioCorreo = async (metrologo, datos, tipoCalendario) => {
+    const correoDestino = correosMetrologos[metrologo]
+
+    if (!correoDestino) {
+        throw new Error(`No se encontró correo registrado para ${metrologo}`)
+    }
+
+    const nombreCalendario = tipoCalendario === 'salida'
+        ? 'salida de campo'
+        : 'actividad interna de laboratorio'
+
+    await transporter.sendMail({
+        from: `"Calendario de Salidas" <${process.env.EMAIL_USER}>`,
+        to: correoDestino,
+        subject: `Recordatorio: mañana tienes una ${nombreCalendario}`,
+        html: `
+            <h2>Recordatorio de ${nombreCalendario}</h2>
+            <p>Mañana tienes lo siguiente agendado:</p>
+            <p><strong>Cliente:</strong> ${datos.cliente}</p>
+            <p><strong>Fecha:</strong> ${new Date(datos.fecha).toLocaleDateString('es-GT', { timeZone: 'UTC' })}</p>
             <p><strong>Hora:</strong> ${datos.hora}</p>
             <p><strong>OIS:</strong> ${datos.ois}</p>
             <p><strong>Observaciones:</strong> ${datos.observaciones || 'Sin observaciones'}</p>

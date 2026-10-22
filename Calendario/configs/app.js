@@ -7,6 +7,7 @@ import salidasRoutes from '../src/salidas/salida.routes.js'
 import actividadesRoutes from '../src/actividades/actividad.routes.js'
 import notificacionesRoutes from '../src/notificaciones/notificacion.routes.js'
 import historialRoutes from '../src/historial/historial.routes.js'
+import recordatoriosRoutes from '../src/recordatorios/recordatorio.routes.js'
 
 export const createApp = () => {
     const app = express()
@@ -20,6 +21,7 @@ export const createApp = () => {
     app.use('/api/actividades', actividadesRoutes)
     app.use('/api/notificaciones', notificacionesRoutes)
     app.use('/api/historial', historialRoutes)
+    app.use('/api/recordatorios', recordatoriosRoutes)
 
     return app
 }
