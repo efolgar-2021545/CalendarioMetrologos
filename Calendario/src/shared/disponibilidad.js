@@ -1,14 +1,14 @@
 import Salida from '../salidas/salida.model.js'
 import Actividad from '../actividades/actividad.model.js'
 
-// Compara solo el día (sin horas)
+// Compara solo el día (sin horas), usando UTC para no depender de la zona horaria del servidor
 const mismoDia = (fechaA, fechaB) => {
     const a = new Date(fechaA)
     const b = new Date(fechaB)
     return (
-        a.getFullYear() === b.getFullYear() &&
-        a.getMonth() === b.getMonth() &&
-        a.getDate() === b.getDate()
+        a.getUTCFullYear() === b.getUTCFullYear() &&
+        a.getUTCMonth() === b.getUTCMonth() &&
+        a.getUTCDate() === b.getUTCDate()
     )
 }
 
@@ -28,17 +28,17 @@ export const validarDisponibilidadGlobal = async (
     excluirId = null,
     excluirColeccion = null
 ) => {
-    const [salidasDelDia, actividadesDelDia] = await Promise.all([
+    const [salidasDelMetrologo, actividadesDelMetrologo] = await Promise.all([
         Salida.find({ metrologo }),
         Actividad.find({ metrologo })
     ])
 
-    const chocaEnSalidas = salidasDelDia.some((s) => {
+    const chocaEnSalidas = salidasDelMetrologo.some((s) => {
         if (excluirColeccion === 'Salida' && s._id.toString() === excluirId) return false
         return mismoDia(s.fecha, fecha)
     })
 
-    const chocaEnActividades = actividadesDelDia.some((a) => {
+    const chocaEnActividades = actividadesDelMetrologo.some((a) => {
         if (excluirColeccion === 'Actividad' && a._id.toString() === excluirId) return false
         return mismoDia(a.fecha, fecha)
     })
