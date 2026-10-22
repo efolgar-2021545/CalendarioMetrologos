@@ -2,3 +2,6 @@ node_modules/
 Node_modules/
 .env
 postgres/
+
+# Variables de entorno (contienen secretos)
+.env
