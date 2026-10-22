@@ -131,3 +131,93 @@ body {
 .contenido {
   padding: 1.5rem;
 }
+
+/* ---------- Selector de calendario ---------- */
+.selector-calendario {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.btn-tab {
+  padding: 0.65rem 1.2rem;
+  border: 2px solid #d1d5db;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #374151;
+  cursor: pointer;
+}
+
+.btn-tab:hover {
+  border-color: #93c5fd;
+}
+
+.btn-tab.activo {
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+  color: #fff;
+}
+
+/* ---------- Calendario ---------- */
+.calendario-contenedor {
+  background: #fff;
+  padding: 1rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+}
+
+.calendario-contenedor .fc-event {
+  cursor: pointer;
+}
+
+.mensaje-cargando {
+  margin: 0 0 0.5rem;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+/* ---------- Ventana de detalle ---------- */
+.modal-fondo {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 1000;
+}
+
+.modal-caja {
+  width: 100%;
+  max-width: 440px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: 10px;
+}
+
+.modal-caja h2 {
+  margin: 0 0 1rem;
+  font-size: 1.2rem;
+}
+
+.detalle-lista {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.5rem 1rem;
+  margin: 0 0 1.5rem;
+}
+
+.detalle-lista dt {
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.detalle-lista dd {
+  margin: 0;
+}
