@@ -221,3 +221,87 @@ body {
 .detalle-lista dd {
   margin: 0;
 }
+
+/* ---------- Panel Admin ---------- */
+.panel-barra {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.ayuda-texto {
+  margin: 0 0 0.75rem;
+  color: #6b7280;
+  font-size: 0.85rem;
+}
+
+.mensaje-ok {
+  margin: 0 0 0.75rem;
+  padding: 0.6rem 0.8rem;
+  background: #dcfce7;
+  color: #166534;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.btn-peligro {
+  background: #dc2626;
+  color: #fff;
+}
+
+.btn-peligro:hover:not(:disabled) {
+  background: #b91c1c;
+}
+
+/* ---------- Formulario ---------- */
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.campo label {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.campo input,
+.campo select,
+.campo textarea {
+  padding: 0.55rem 0.7rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  background: #fff;
+}
+
+.campo input:focus,
+.campo select:focus,
+.campo textarea:focus {
+  outline: 2px solid #93c5fd;
+  border-color: #1d4ed8;
+}
+
+.campo textarea {
+  resize: vertical;
+}
+
+.modal-acciones {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.espaciador {
+  flex: 1;
+}
