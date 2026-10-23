@@ -35,3 +35,19 @@ export const toggleMetrologoStatus = async (req, res) => {
         res.status(400).json({ message: error.message })
     }
 }
+
+export const updateMyPassword = async (req, res) => {
+    try {
+        const { currentPassword, newPassword } = req.body
+
+        const result = await usersService.changePassword(
+            req.user.id,
+            currentPassword,
+            newPassword
+        )
+
+        res.status(200).json(result)
+    } catch (error) {
+        res.status(400).json({ message: error.message })
+    }
+}

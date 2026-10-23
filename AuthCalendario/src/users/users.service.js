@@ -1,4 +1,5 @@
 import { User, Role } from '../models/index.js'
+import { hashPassword, comparePassword } from '../../helpers/hash-password.js'
 
 // Listar todos los metrólogos (rol USUARIO) para el Admin
 export const getMetrologos = async () => {
@@ -58,4 +59,26 @@ export const toggleUserStatus = async (id) => {
         name: user.name,
         isActive: user.isActive
     }
+}
+
+// Cambiar la contraseña propia (Admin o metrólogo)
+export const changePassword = async (userId, currentPassword, newPassword) => {
+    if (!currentPassword || !newPassword) {
+        throw new Error('Debes enviar la contraseña actual y la nueva')
+    }
+
+    if (newPassword.length < 8) {
+        throw new Error('La nueva contraseña debe tener al menos 8 caracteres')
+    }
+
+    const user = await User.findByPk(userId)
+
+    if (!user) throw new Error('Usuario no encontrado')
+
+    const coincide = await comparePassword(currentPassword, user.password)
+    if (!coincide) throw new Error('Contraseña actual incorrecta')
+
+    await user.update({ password: await hashPassword(newPassword) })
+
+    return { message: 'Contraseña actualizada correctamente' }
 }
