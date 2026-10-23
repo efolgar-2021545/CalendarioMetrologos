@@ -20,9 +20,17 @@ export const initUserModel = (sequelize) => {
             type: DataTypes.STRING,
             allowNull: false,
         },
+        // PENDIENTE: pidió acceso y espera al Admin. APROBADO: el Admin lo aceptó.
+        status: {
+            type: DataTypes.STRING(20),
+            allowNull: false,
+            defaultValue: 'PENDIENTE',
+            validate: { isIn: [['PENDIENTE', 'APROBADO']] },
+        },
+        // Permite al Admin desactivar a un usuario ya aprobado
         isActive: {
             type: DataTypes.BOOLEAN,
-            defaultValue: true,
+            defaultValue: false,
         },
     })
 }

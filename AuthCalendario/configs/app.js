@@ -6,6 +6,7 @@ import morgan from 'morgan'
 import { corsOptions } from './cors-configuration.js'
 import authRoutes from '../src/auth/auth.routes.js'
 import userRoutes from '../src/users/users.routes.js'
+import internalRoutes from '../src/internal/internal.routes.js'
 
 export const createApp = () => {
     const app = express()
@@ -17,6 +18,7 @@ export const createApp = () => {
 
     app.use('/api/auth', authRoutes)
     app.use('/api/users', userRoutes)
+    app.use('/api/internal', internalRoutes)
 
     return app
 }

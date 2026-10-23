@@ -1,32 +1,45 @@
 import { User, Role } from '../models/index.js'
 import { hashPassword } from '../../helpers/hash-password.js'
 
-// Cuentas base del sistema: el admin y los metrólogos
-const seedUsers = [
-    { name: 'Manuel', email: 'manuel@calendario.com', password: 'Manuel2026*', role: 'ADMIN' },
-    { name: 'Dilsy', email: 'dilsy@calendario.com', password: 'Dilsy2026*', role: 'USUARIO' },
-    { name: 'Alejandra', email: 'alejandra@calendario.com', password: 'Alejandra2026*', role: 'USUARIO' },
-    { name: 'Hector', email: 'hector@calendario.com', password: 'Hector2026*', role: 'USUARIO' },
-]
-
 export const seedAdminGeneral = async () => {
-    for (const seedUser of seedUsers) {
-        const role = await Role.findOne({ where: { name: seedUser.role } })
+    const adminRole = await Role.findOne({ where: { name: 'ADMIN' } })
 
-        const exists = await User.findOne({ where: { email: seedUser.email } })
+    // Si ya existe un Admin, no se crea otro
+    const adminExistente = await User.findOne({ where: { roleId: adminRole.id } })
 
-        if (!exists) {
-            const hashedPassword = await hashPassword(seedUser.password)
-
-            await User.create({
-                name: seedUser.name,
-                email: seedUser.email,
-                password: hashedPassword,
-                roleId: role.id,
-                isActive: true
-            })
-
-            console.log(`Usuario ${seedUser.name} (${seedUser.role}) creado automáticamente`)
+    if (adminExistente) {
+        // Por si quedó pendiente o inactivo al agregar el campo status
+        if (adminExistente.status !== 'APROBADO' || !adminExistente.isActive) {
+            await adminExistente.update({ status: 'APROBADO', isActive: true })
         }
+        return
     }
+
+    const name = process.env.ADMIN_NAME?.trim()
+    const email = process.env.ADMIN_EMAIL?.trim().toLowerCase()
+    const password = process.env.ADMIN_PASSWORD
+
+    if (!name || !email || !password) {
+        console.error('Faltan ADMIN_NAME, ADMIN_EMAIL o ADMIN_PASSWORD en AuthCalendario/.env')
+        process.exit(1)
+    }
+
+    const correoEnUso = await User.findOne({ where: { email } })
+    if (correoEnUso) {
+        console.error(
+            `El correo ${email} ya pertenece a otro usuario. Bórralo de la tabla users o usa otro ADMIN_EMAIL`
+        )
+        process.exit(1)
+    }
+
+    await User.create({
+        name,
+        email,
+        password: await hashPassword(password),
+        roleId: adminRole.id,
+        status: 'APROBADO',
+        isActive: true
+    })
+
+    console.log(`Administrador creado: ${email}`)
 }
