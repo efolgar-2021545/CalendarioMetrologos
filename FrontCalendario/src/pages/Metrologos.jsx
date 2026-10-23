@@ -124,7 +124,7 @@ const Metrologos = () => {
                     )}
 
                     <p className="ayuda-texto">
-                        Manuel no aparece en esta lista porque es el Administrador.
+                        El administrador no aparece en esta lista. Las cuentas nuevas se aprueban en la sección Solicitudes.
                     </p>
                 </section>
 

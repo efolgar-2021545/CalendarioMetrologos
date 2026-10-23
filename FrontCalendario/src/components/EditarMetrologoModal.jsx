@@ -47,9 +47,8 @@ const EditarMetrologoModal = ({ metrologo, onClose, onGuardado }) => {
                     </div>
 
                     <p className="ayuda-texto">
-                        Este correo es con el que el metrólogo inicia sesión. Las notificaciones
-                        se envían a los correos definidos en <code>notificacion.config.js</code> del
-                        servicio Calendario.
+                        Este correo es con el que el metrólogo inicia sesión y también al que
+                        le llegan las notificaciones y recordatorios.
                     </p>
 
                     {error && <p className="mensaje-error">{error}</p>}

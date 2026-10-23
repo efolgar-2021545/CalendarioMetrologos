@@ -5,6 +5,7 @@ import { ROLES } from '../utils/constants.js'
 
 const LINKS_ADMIN = [
     { to: '/admin', etiqueta: 'Calendarios', end: true },
+    { to: '/admin/solicitudes', etiqueta: 'Solicitudes' },
     { to: '/admin/historial', etiqueta: 'Historial' },
     { to: '/admin/metrologos', etiqueta: 'Metrólogos' }
 ]

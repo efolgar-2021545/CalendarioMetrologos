@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import Navbar from '../components/Navbar.jsx'
 import { getResumenAnual, getDetalleMes } from '../services/historial.service.js'
-import { METROLOGOS } from '../utils/constants.js'
 import { fechaCorta } from '../utils/fechas.js'
 
 const anioActual = new Date().getFullYear()
@@ -105,6 +104,11 @@ const Historial = () => {
     const totalAnualMetrologo = (nombre) =>
         resumen.meses.reduce((suma, mes) => suma + totalMetrologo(mes, nombre), 0)
 
+    // Columnas dinámicas: los metrólogos que aparecen en los datos del año
+    const columnas = resumen
+        ? [...new Set(resumen.meses.flatMap((mes) => Object.keys(mes.porMetrologo)))].sort()
+        : []
+
     return (
         <>
             <Navbar titulo="Historial de visitas y servicios" />
@@ -149,7 +153,7 @@ const Historial = () => {
                                         <th>Salidas</th>
                                         <th>Actividades</th>
                                         <th>Total</th>
-                                        {METROLOGOS.map((m) => (
+                                        {columnas.map((m) => (
                                             <th key={m}>{m}</th>
                                         ))}
                                         <th></th>
@@ -165,7 +169,7 @@ const Historial = () => {
                                             <td>{mes.salidas}</td>
                                             <td>{mes.actividades}</td>
                                             <td><strong>{mes.total}</strong></td>
-                                            {METROLOGOS.map((m) => (
+                                            {columnas.map((m) => (
                                                 <td key={m}>{totalMetrologo(mes, m)}</td>
                                             ))}
                                             <td>
@@ -186,7 +190,7 @@ const Historial = () => {
                                         <td>{resumen.totalAnual.salidas}</td>
                                         <td>{resumen.totalAnual.actividades}</td>
                                         <td>{resumen.totalAnual.total}</td>
-                                        {METROLOGOS.map((m) => (
+                                        {columnas.map((m) => (
                                             <td key={m}>{totalAnualMetrologo(m)}</td>
                                         ))}
                                         <td></td>

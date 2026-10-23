@@ -479,3 +479,10 @@ body {
   background: #fee2e2;
   color: #991b1b;
 }
+
+/* ---------- Botones que son enlaces ---------- */
+.btn-enlace {
+  display: block;
+  text-align: center;
+  text-decoration: none;
+}

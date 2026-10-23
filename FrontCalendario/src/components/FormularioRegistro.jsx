@@ -1,7 +1,8 @@
-import { useState } from 'react'
-import { METROLOGOS, HORAS } from '../utils/constants.js'
+import { useEffect, useState } from 'react'
+import { HORAS } from '../utils/constants.js'
 import { SERVICIOS } from '../utils/servicios.js'
 import { diaDeRegistro } from '../utils/fechas.js'
+import { getDirectorio } from '../services/users.service.js'
 
 const TITULOS = {
     salidas: 'salida de metrólogo',
@@ -16,15 +17,57 @@ const FormularioRegistro = ({ tipo, registro, fechaInicial, horaInicial, onClose
         fecha: registro ? diaDeRegistro(registro.fecha) : fechaInicial || '',
         hora: registro ? registro.hora : horaInicial || '',
         cliente: registro?.cliente || '',
-        metrologo: registro?.metrologo || '',
+        metrologoId: registro?.metrologoId || '',
         ois: registro?.ois || '',
         observaciones: registro?.observaciones || '',
         notificar: 'no'
     })
+    const [directorio, setDirectorio] = useState([])
+    const [cargandoLista, setCargandoLista] = useState(true)
     const [error, setError] = useState('')
     const [guardando, setGuardando] = useState(false)
 
-    // Si el registro tiene una hora que no está en la lista (ej. creado por Postman), la incluimos
+    // Carga los usuarios aprobados desde el servicio de Auth
+    useEffect(() => {
+        let cancelado = false
+
+        const cargarLista = async () => {
+            try {
+                const lista = await getDirectorio()
+                if (!cancelado) setDirectorio(lista)
+            } catch (err) {
+                if (!cancelado) {
+                    setError(
+                        err.response?.data?.message ||
+                        'No se pudo cargar la lista de metrólogos. Verifica que el servidor de Auth esté encendido.'
+                    )
+                }
+            } finally {
+                if (!cancelado) setCargandoLista(false)
+            }
+        }
+
+        cargarLista()
+
+        return () => {
+            cancelado = true
+        }
+    }, [])
+
+    // Solo se pueden agendar usuarios activos
+    const opcionesMetrologo = directorio
+        .filter((u) => u.isActive)
+        .map((u) => ({ id: u.id, name: u.name }))
+
+    // Al editar, si el metrólogo del registro ya no está activo, lo mostramos igual
+    if (registro && !opcionesMetrologo.some((o) => o.id === registro.metrologoId)) {
+        opcionesMetrologo.push({
+            id: registro.metrologoId,
+            name: cargandoLista ? registro.metrologo : `${registro.metrologo} (inactivo)`
+        })
+    }
+
+    // Si el registro tiene una hora que no está en la lista, la incluimos
     const horasDisponibles = HORAS.includes(form.hora) || !form.hora
         ? HORAS
         : [...HORAS, form.hora].sort()
@@ -43,7 +86,7 @@ const FormularioRegistro = ({ tipo, registro, fechaInicial, horaInicial, onClose
                 fecha: form.fecha,
                 hora: form.hora,
                 cliente: form.cliente.trim(),
-                metrologo: form.metrologo,
+                metrologoId: form.metrologoId,
                 ois: form.ois.trim(),
                 observaciones: form.observaciones.trim()
             }
@@ -61,7 +104,7 @@ const FormularioRegistro = ({ tipo, registro, fechaInicial, horaInicial, onClose
             if (form.notificar === 'si') {
                 try {
                     await servicio.notificar(guardado._id)
-                    aviso.texto += ` y notificación enviada a ${form.metrologo}`
+                    aviso.texto += ` y notificación enviada a ${guardado.metrologo}`
                 } catch (err) {
                     aviso = {
                         tipo: 'error',
@@ -143,17 +186,19 @@ const FormularioRegistro = ({ tipo, registro, fechaInicial, horaInicial, onClose
                     </div>
 
                     <div className="campo">
-                        <label htmlFor="metrologo">Metrólogo</label>
+                        <label htmlFor="metrologoId">Metrólogo</label>
                         <select
-                            id="metrologo"
-                            name="metrologo"
-                            value={form.metrologo}
+                            id="metrologoId"
+                            name="metrologoId"
+                            value={form.metrologoId}
                             onChange={handleChange}
                             required
                         >
-                            <option value="">Selecciona un metrólogo</option>
-                            {METROLOGOS.map((m) => (
-                                <option key={m} value={m}>{m}</option>
+                            <option value="">
+                                {cargandoLista ? 'Cargando metrólogos...' : 'Selecciona un metrólogo'}
+                            </option>
+                            {opcionesMetrologo.map((m) => (
+                                <option key={m.id} value={m.id}>{m.name}</option>
                             ))}
                         </select>
                     </div>
@@ -213,7 +258,7 @@ const FormularioRegistro = ({ tipo, registro, fechaInicial, horaInicial, onClose
                         >
                             Cancelar
                         </button>
-                        <button type="submit" className="btn btn-primario" disabled={guardando}>
+                        <button type="submit" className="btn btn-primario" disabled={guardando || cargandoLista}>
                             {guardando ? 'Guardando...' : 'Guardar'}
                         </button>
                     </div>

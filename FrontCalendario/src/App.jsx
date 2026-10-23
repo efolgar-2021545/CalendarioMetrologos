@@ -5,8 +5,10 @@ import { ROLES } from './utils/constants.js'
 
 import ProtectedRoute from './routes/ProtectedRoute.jsx'
 import Login from './pages/Login.jsx'
+import Registro from './pages/Registro.jsx'
 import CalendarioUsuario from './pages/CalendarioUsuario.jsx'
 import AdminPanel from './pages/AdminPanel.jsx'
+import Solicitudes from './pages/Solicitudes.jsx'
 import Historial from './pages/Historial.jsx'
 import Metrologos from './pages/Metrologos.jsx'
 
@@ -16,11 +18,16 @@ const RedirectInicio = () => {
   return <Navigate to={getHomePath(user) ?? '/login'} replace />
 }
 
+const rutaAdmin = (elemento) => (
+  <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>{elemento}</ProtectedRoute>
+)
+
 const App = () => {
   return (
     <Routes>
       <Route path="/" element={<RedirectInicio />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/registro" element={<Registro />} />
 
       <Route
         path="/calendario"
@@ -31,32 +38,10 @@ const App = () => {
         }
       />
 
-      <Route
-        path="/admin"
-        element={
-          <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
-            <AdminPanel />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/admin/historial"
-        element={
-          <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
-            <Historial />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/admin/metrologos"
-        element={
-          <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
-            <Metrologos />
-          </ProtectedRoute>
-        }
-      />
+      <Route path="/admin" element={rutaAdmin(<AdminPanel />)} />
+      <Route path="/admin/solicitudes" element={rutaAdmin(<Solicitudes />)} />
+      <Route path="/admin/historial" element={rutaAdmin(<Historial />)} />
+      <Route path="/admin/metrologos" element={rutaAdmin(<Metrologos />)} />
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

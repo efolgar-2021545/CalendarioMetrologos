@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Navigate, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import { getHomePath } from '../utils/roles.js'
 
@@ -74,6 +74,10 @@ const Login = () => {
                 <button className="btn btn-primario" type="submit" disabled={cargando}>
                     {cargando ? 'Ingresando...' : 'Ingresar'}
                 </button>
+
+                <Link to="/registro" className="btn btn-secundario btn-enlace">
+                    Crear cuenta
+                </Link>
             </form>
         </div>
     )
