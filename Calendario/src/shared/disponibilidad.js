@@ -17,7 +17,7 @@ const mismoDia = (fechaA, fechaB) => {
  * ni en Salidas ni en Actividades (los dos calendarios).
  * Si es un día distinto, no hay problema (se permite).
  *
- * @param {string} metrologo - nombre del metrólogo
+ * @param {{id: string, name: string}} metrologo
  * @param {Date|string} fecha - fecha a validar
  * @param {string|null} excluirId - id del propio registro cuando se está editando
  * @param {'Salida'|'Actividad'} excluirColeccion - a qué colección pertenece excluirId
@@ -29,8 +29,8 @@ export const validarDisponibilidadGlobal = async (
     excluirColeccion = null
 ) => {
     const [salidasDelMetrologo, actividadesDelMetrologo] = await Promise.all([
-        Salida.find({ metrologo }),
-        Actividad.find({ metrologo })
+        Salida.find({ metrologoId: metrologo.id }),
+        Actividad.find({ metrologoId: metrologo.id })
     ])
 
     const chocaEnSalidas = salidasDelMetrologo.some((s) => {
@@ -45,7 +45,7 @@ export const validarDisponibilidadGlobal = async (
 
     if (chocaEnSalidas || chocaEnActividades) {
         throw new Error(
-            `${metrologo} ya tiene una salida o actividad agendada ese mismo día`
+            `${metrologo.name} ya tiene una salida o actividad agendada ese mismo día`
         )
     }
 }

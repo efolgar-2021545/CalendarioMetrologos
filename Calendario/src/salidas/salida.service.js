@@ -1,16 +1,20 @@
 import Salida from './salida.model.js'
 import { validarDisponibilidadGlobal } from '../shared/disponibilidad.js'
+import { obtenerMetrologoActivo } from '../shared/directorio.js'
 
 export const createSalida = async (data, adminId) => {
-    const { fecha, cliente, metrologo, hora, ois, observaciones } = data
+    const { fecha, cliente, metrologoId, hora, ois, observaciones } = data
 
-    // Validación de disponibilidad global entre colecciones
+    // Confirma con el servicio de usuarios que el metrólogo existe y está activo
+    const metrologo = await obtenerMetrologoActivo(metrologoId)
+
     await validarDisponibilidadGlobal(metrologo, fecha)
 
     const salida = await Salida.create({
         fecha,
         cliente,
-        metrologo,
+        metrologoId: metrologo.id,
+        metrologo: metrologo.name,
         hora,
         ois,
         observaciones,
@@ -29,8 +33,8 @@ export const getSalidas = async (filtros = {}) => {
     }
 
     // Filtro opcional por metrólogo
-    if (filtros.metrologo) {
-        query.metrologo = filtros.metrologo
+    if (filtros.metrologoId) {
+        query.metrologoId = filtros.metrologoId
     }
 
     const salidas = await Salida.find(query).sort({ fecha: 1, hora: 1 })
@@ -47,12 +51,19 @@ export const updateSalida = async (id, data) => {
     const salida = await Salida.findById(id)
     if (!salida) throw new Error('Salida no encontrada')
 
-    const nuevoMetrologo = data.metrologo ?? salida.metrologo
+    // Solo consultamos al servicio de usuarios si cambió el metrólogo
+    let metrologo = { id: salida.metrologoId, name: salida.metrologo }
+    const cambioMetrologo = Boolean(data.metrologoId) && data.metrologoId !== salida.metrologoId
+
+    if (cambioMetrologo) {
+        metrologo = await obtenerMetrologoActivo(data.metrologoId)
+    }
+
     const nuevaFecha = data.fecha ?? salida.fecha
 
-    // Solo revalidamos disponibilidad global si cambió el metrólogo o la fecha
-    if (data.metrologo || data.fecha) {
-        await validarDisponibilidadGlobal(nuevoMetrologo, nuevaFecha, id, 'Salida')
+    // Solo revalidamos disponibilidad si cambió el metrólogo o se envió fecha
+    if (cambioMetrologo || data.fecha) {
+        await validarDisponibilidadGlobal(metrologo, nuevaFecha, id, 'Salida')
     }
 
     const actualizada = await Salida.findByIdAndUpdate(
@@ -60,7 +71,8 @@ export const updateSalida = async (id, data) => {
         {
             fecha: nuevaFecha,
             cliente: data.cliente ?? salida.cliente,
-            metrologo: nuevoMetrologo,
+            metrologoId: metrologo.id,
+            metrologo: metrologo.name,
             hora: data.hora ?? salida.hora,
             ois: data.ois ?? salida.ois,
             observaciones: data.observaciones ?? salida.observaciones

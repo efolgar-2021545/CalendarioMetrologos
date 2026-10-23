@@ -9,10 +9,13 @@ const actividadSchema = new Schema({
         type: String,
         required: [true, 'El cliente es obligatorio']
     },
+    metrologoId: {
+        type: String,
+        required: [true, 'Debes asignar un metrólogo']
+    },
     metrologo: {
         type: String,
-        required: [true, 'Debes asignar un metrólogo'],
-        enum: ['Dilsy', 'Alejandra', 'Manuel', 'Hector']
+        required: [true, 'Debes asignar un metrólogo']
     },
     hora: {
         type: String,

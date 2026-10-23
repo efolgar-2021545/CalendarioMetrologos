@@ -17,8 +17,8 @@ export const createSalida = async (req, res) => {
 
 export const getSalidas = async (req, res) => {
     try {
-        const { desde, hasta, metrologo } = req.query
-        const salidas = await salidaService.getSalidas({ desde, hasta, metrologo })
+        const { desde, hasta, metrologoId } = req.query
+        const salidas = await salidaService.getSalidas({ desde, hasta, metrologoId })
         return res.json({
             success: true,
             salidas

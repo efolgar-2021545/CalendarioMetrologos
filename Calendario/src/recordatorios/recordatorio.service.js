@@ -1,6 +1,7 @@
 import Salida from '../salidas/salida.model.js'
 import Actividad from '../actividades/actividad.model.js'
 import { enviarRecordatorioCorreo } from '../notificaciones/notificacion.service.js'
+import { obtenerDirectorio } from '../shared/directorio.js'
 
 const ZONA_HORARIA = 'America/Guatemala'
 const UN_DIA_MS = 24 * 60 * 60 * 1000
@@ -34,18 +35,28 @@ export const ejecutarRecordatorios = async () => {
     let enviados = 0
     const fallidos = []
 
-    // Si un correo falla, seguimos con los demás
-    for (const { registro, tipo } of pendientes) {
-        try {
-            await enviarRecordatorioCorreo(registro.metrologo, registro, tipo)
-            enviados++
-        } catch (error) {
-            fallidos.push({
-                id: registro._id,
-                metrologo: registro.metrologo,
-                tipo,
-                error: error.message
-            })
+    // Solo consultamos a Auth si hay algo que recordar
+    if (pendientes.length > 0) {
+        const directorio = await obtenerDirectorio()
+        const usuariosPorId = new Map(directorio.map((u) => [u.id, u]))
+
+        // Si un correo falla, seguimos con los demás
+        for (const { registro, tipo } of pendientes) {
+            try {
+                const usuario = usuariosPorId.get(registro.metrologoId)
+
+                if (!usuario) throw new Error('El metrólogo ya no existe en el sistema')
+
+                await enviarRecordatorioCorreo(usuario.email, registro, tipo)
+                enviados++
+            } catch (error) {
+                fallidos.push({
+                    id: registro._id,
+                    metrologo: registro.metrologo,
+                    tipo,
+                    error: error.message
+                })
+            }
         }
     }
 

@@ -9,13 +9,16 @@ const salidaSchema = new Schema({
         type: String,
         required: [true, 'El cliente es obligatorio']
     },
+    metrologoId: {
+        type: String, // id del usuario en AuthCalendario
+        required: [true, 'Debes asignar un metrólogo']
+    },
     metrologo: {
-        type: String,
-        required: [true, 'Debes asignar un metrólogo'],
-        enum: ['Dilsy', 'Alejandra', 'Manuel', 'Hector']
+        type: String, // nombre del usuario al momento de agendar
+        required: [true, 'Debes asignar un metrólogo']
     },
     hora: {
-        type: String, // ej. "09:00", se llena desde un select en el frontend
+        type: String,
         required: [true, 'La hora es obligatoria']
     },
     ois: {
@@ -31,7 +34,7 @@ const salidaSchema = new Schema({
         default: false
     },
     creadoPor: {
-        type: String, // uid del admin que la agendó (viene del token)
+        type: String,
         required: true
     }
 }, {

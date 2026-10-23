@@ -1,15 +1,19 @@
 import Actividad from './actividad.model.js'
 import { validarDisponibilidadGlobal } from '../shared/disponibilidad.js'
+import { obtenerMetrologoActivo } from '../shared/directorio.js'
 
 export const createActividad = async (data, adminId) => {
-    const { fecha, cliente, metrologo, hora, ois, observaciones } = data
+    const { fecha, cliente, metrologoId, hora, ois, observaciones } = data
+
+    const metrologo = await obtenerMetrologoActivo(metrologoId)
 
     await validarDisponibilidadGlobal(metrologo, fecha)
 
     const actividad = await Actividad.create({
         fecha,
         cliente,
-        metrologo,
+        metrologoId: metrologo.id,
+        metrologo: metrologo.name,
         hora,
         ois,
         observaciones,
@@ -26,8 +30,8 @@ export const getActividades = async (filtros = {}) => {
         query.fecha = { $gte: new Date(filtros.desde), $lte: new Date(filtros.hasta) }
     }
 
-    if (filtros.metrologo) {
-        query.metrologo = filtros.metrologo
+    if (filtros.metrologoId) {
+        query.metrologoId = filtros.metrologoId
     }
 
     const actividades = await Actividad.find(query).sort({ fecha: 1, hora: 1 })
@@ -44,11 +48,17 @@ export const updateActividad = async (id, data) => {
     const actividad = await Actividad.findById(id)
     if (!actividad) throw new Error('Actividad no encontrada')
 
-    const nuevoMetrologo = data.metrologo ?? actividad.metrologo
+    let metrologo = { id: actividad.metrologoId, name: actividad.metrologo }
+    const cambioMetrologo = Boolean(data.metrologoId) && data.metrologoId !== actividad.metrologoId
+
+    if (cambioMetrologo) {
+        metrologo = await obtenerMetrologoActivo(data.metrologoId)
+    }
+
     const nuevaFecha = data.fecha ?? actividad.fecha
 
-    if (data.metrologo || data.fecha) {
-        await validarDisponibilidadGlobal(nuevoMetrologo, nuevaFecha, id, 'Actividad')
+    if (cambioMetrologo || data.fecha) {
+        await validarDisponibilidadGlobal(metrologo, nuevaFecha, id, 'Actividad')
     }
 
     const actualizada = await Actividad.findByIdAndUpdate(
@@ -56,7 +66,8 @@ export const updateActividad = async (id, data) => {
         {
             fecha: nuevaFecha,
             cliente: data.cliente ?? actividad.cliente,
-            metrologo: nuevoMetrologo,
+            metrologoId: metrologo.id,
+            metrologo: metrologo.name,
             hora: data.hora ?? actividad.hora,
             ois: data.ois ?? actividad.ois,
             observaciones: data.observaciones ?? actividad.observaciones

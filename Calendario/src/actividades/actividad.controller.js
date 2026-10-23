@@ -17,8 +17,8 @@ export const createActividad = async (req, res) => {
 
 export const getActividades = async (req, res) => {
     try {
-        const { desde, hasta, metrologo } = req.query
-        const actividades = await actividadService.getActividades({ desde, hasta, metrologo })
+        const { desde, hasta, metrologoId } = req.query
+        const actividades = await actividadService.getActividades({ desde, hasta, metrologoId })
         return res.json({
             success: true,
             actividades

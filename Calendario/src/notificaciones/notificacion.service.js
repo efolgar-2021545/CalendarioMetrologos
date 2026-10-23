@@ -1,7 +1,7 @@
 import nodemailer from 'nodemailer'
-import { correosMetrologos } from './notificacion.config.js'
 import Salida from '../salidas/salida.model.js'
 import Actividad from '../actividades/actividad.model.js'
+import { obtenerUsuario } from '../shared/directorio.js'
 
 const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -11,57 +11,43 @@ const transporter = nodemailer.createTransport({
     }
 })
 
-const enviarCorreo = async (metrologo, datos, tipoCalendario) => {
-    const correoDestino = correosMetrologos[metrologo]
+const NOMBRES = {
+    salida: 'salida de campo',
+    actividad: 'actividad interna de laboratorio'
+}
 
-    if (!correoDestino) {
-        throw new Error(`No se encontró correo registrado para ${metrologo}`)
-    }
+const formatearFecha = (fecha) =>
+    new Date(fecha).toLocaleDateString('es-GT', { timeZone: 'UTC' })
 
-    const nombreCalendario = tipoCalendario === 'salida'
-        ? 'salida de campo'
-        : 'actividad interna de laboratorio'
+const detalleHtml = (datos) => `
+    <p><strong>Cliente:</strong> ${datos.cliente}</p>
+    <p><strong>Fecha:</strong> ${formatearFecha(datos.fecha)}</p>
+    <p><strong>Hora:</strong> ${datos.hora}</p>
+    <p><strong>OIS:</strong> ${datos.ois}</p>
+    <p><strong>Observaciones:</strong> ${datos.observaciones || 'Sin observaciones'}</p>
+`
+
+// Correo de "se te agendó algo"
+const enviarCorreo = async (correoDestino, datos, tipoCalendario) => {
+    const nombre = NOMBRES[tipoCalendario]
 
     await transporter.sendMail({
         from: `"Calendario de Salidas" <${process.env.EMAIL_USER}>`,
         to: correoDestino,
-        subject: `Nueva ${nombreCalendario} agendada`,
-        html: `
-            <h2>Se te agendó una ${nombreCalendario}</h2>
-            <p><strong>Cliente:</strong> ${datos.cliente}</p>
-            <p><strong>Fecha:</strong> ${new Date(datos.fecha).toLocaleDateString('es-GT', { timeZone: 'UTC' })}</p>
-            <p><strong>Hora:</strong> ${datos.hora}</p>
-            <p><strong>OIS:</strong> ${datos.ois}</p>
-            <p><strong>Observaciones:</strong> ${datos.observaciones || 'Sin observaciones'}</p>
-        `
+        subject: `Nueva ${nombre} agendada`,
+        html: `<h2>Se te agendó una ${nombre}</h2>${detalleHtml(datos)}`
     })
 }
 
 // Correo de recordatorio (lo usa el módulo de recordatorios)
-export const enviarRecordatorioCorreo = async (metrologo, datos, tipoCalendario) => {
-    const correoDestino = correosMetrologos[metrologo]
-
-    if (!correoDestino) {
-        throw new Error(`No se encontró correo registrado para ${metrologo}`)
-    }
-
-    const nombreCalendario = tipoCalendario === 'salida'
-        ? 'salida de campo'
-        : 'actividad interna de laboratorio'
+export const enviarRecordatorioCorreo = async (correoDestino, datos, tipoCalendario) => {
+    const nombre = NOMBRES[tipoCalendario]
 
     await transporter.sendMail({
         from: `"Calendario de Salidas" <${process.env.EMAIL_USER}>`,
         to: correoDestino,
-        subject: `Recordatorio: mañana tienes una ${nombreCalendario}`,
-        html: `
-            <h2>Recordatorio de ${nombreCalendario}</h2>
-            <p>Mañana tienes lo siguiente agendado:</p>
-            <p><strong>Cliente:</strong> ${datos.cliente}</p>
-            <p><strong>Fecha:</strong> ${new Date(datos.fecha).toLocaleDateString('es-GT', { timeZone: 'UTC' })}</p>
-            <p><strong>Hora:</strong> ${datos.hora}</p>
-            <p><strong>OIS:</strong> ${datos.ois}</p>
-            <p><strong>Observaciones:</strong> ${datos.observaciones || 'Sin observaciones'}</p>
-        `
+        subject: `Recordatorio: mañana tienes una ${nombre}`,
+        html: `<h2>Recordatorio de ${nombre}</h2><p>Mañana tienes lo siguiente agendado:</p>${detalleHtml(datos)}`
     })
 }
 
@@ -70,12 +56,14 @@ export const notificarSalida = async (id) => {
     const salida = await Salida.findById(id)
     if (!salida) throw new Error('Salida no encontrada')
 
-    await enviarCorreo(salida.metrologo, salida, 'salida')
+    const metrologo = await obtenerUsuario(salida.metrologoId)
+
+    await enviarCorreo(metrologo.email, salida, 'salida')
 
     salida.notificacionEnviada = true
     await salida.save()
 
-    return { message: `Notificación enviada a ${salida.metrologo}` }
+    return { message: `Notificación enviada a ${metrologo.name}` }
 }
 
 // Notifica sobre una Actividad (segundo calendario) y marca el registro como notificado
@@ -83,10 +71,12 @@ export const notificarActividad = async (id) => {
     const actividad = await Actividad.findById(id)
     if (!actividad) throw new Error('Actividad no encontrada')
 
-    await enviarCorreo(actividad.metrologo, actividad, 'actividad')
+    const metrologo = await obtenerUsuario(actividad.metrologoId)
+
+    await enviarCorreo(metrologo.email, actividad, 'actividad')
 
     actividad.notificacionEnviada = true
     await actividad.save()
 
-    return { message: `Notificación enviada a ${actividad.metrologo}` }
+    return { message: `Notificación enviada a ${metrologo.name}` }
 }
