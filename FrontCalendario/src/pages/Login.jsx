@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import { getHomePath } from '../utils/roles.js'
+import MarcaLateral from '../components/MarcaLateral.jsx'
 
 const Login = () => {
     const { user, login } = useAuth()
@@ -45,40 +46,44 @@ const Login = () => {
 
     return (
         <div className="login-pagina">
-            <form className="login-tarjeta" onSubmit={handleSubmit}>
-                <h1>Calendario de Salidas</h1>
-                <p className="login-subtitulo">Inicia sesión para continuar</p>
+            <MarcaLateral />
 
-                <label htmlFor="email">Correo</label>
-                <input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="correo@ejemplo.com"
-                    required
-                />
+            <div className="login-panel">
+                <form className="login-tarjeta" onSubmit={handleSubmit}>
+                    <h1>Iniciar sesión</h1>
+                    <p className="login-subtitulo">Ingresa con tu correo y tu contraseña.</p>
 
-                <label htmlFor="password">Contraseña</label>
-                <input
-                    id="password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    required
-                />
+                    <label htmlFor="email">Correo</label>
+                    <input
+                        id="email"
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="correo@ejemplo.com"
+                        required
+                    />
 
-                {error && <p className="mensaje-error">{error}</p>}
+                    <label htmlFor="password">Contraseña</label>
+                    <input
+                        id="password"
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="••••••••"
+                        required
+                    />
 
-                <button className="btn btn-primario" type="submit" disabled={cargando}>
-                    {cargando ? 'Ingresando...' : 'Ingresar'}
-                </button>
+                    {error && <p className="mensaje-error">{error}</p>}
 
-                <Link to="/registro" className="btn btn-secundario btn-enlace">
-                    Crear cuenta
-                </Link>
-            </form>
+                    <button className="btn btn-primario" type="submit" disabled={cargando}>
+                        {cargando ? 'Ingresando...' : 'Ingresar'}
+                    </button>
+
+                    <Link to="/registro" className="btn btn-secundario btn-enlace">
+                        Crear cuenta
+                    </Link>
+                </form>
+            </div>
         </div>
     )
 }

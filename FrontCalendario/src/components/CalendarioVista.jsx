@@ -11,8 +11,8 @@ import { formatearFecha, diaDeRegistro } from '../utils/fechas.js'
 
 // Qué función usa y de qué color se pinta cada calendario
 const CONFIG = {
-    salidas: { cargar: getSalidas, color: '#1d4ed8' },
-    actividades: { cargar: getActividades, color: '#15803d' }
+    salidas: { cargar: getSalidas, color: '#0f7482' },
+    actividades: { cargar: getActividades, color: '#a5640f' }
 }
 
 // Convierte un registro del backend en un evento de FullCalendar
