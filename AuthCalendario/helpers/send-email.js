@@ -1,18 +1,9 @@
-import nodemailer from 'nodemailer'
+import { enviarEmail } from './email.js'
 
 export const sendApprovalEmail = async (email, name) => {
-    const transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS
-        }
-    })
+    const link = (process.env.FRONTEND_URL || 'http://localhost:5173').split(',')[0].trim()
 
-    const link = process.env.FRONTEND_URL || 'http://localhost:5173'
-
-    await transporter.sendMail({
-        from: `"Calendario de Salidas" <${process.env.EMAIL_USER}>`,
+    await enviarEmail({
         to: email,
         subject: 'Tu cuenta fue aprobada',
         html: `
