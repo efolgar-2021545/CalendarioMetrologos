@@ -1,15 +1,7 @@
-import nodemailer from 'nodemailer'
 import Salida from '../salidas/salida.model.js'
 import Actividad from '../actividades/actividad.model.js'
 import { obtenerUsuario } from '../shared/directorio.js'
-
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-    }
-})
+import { enviarEmail } from '../shared/email.js'
 
 const NOMBRES = {
     salida: 'salida de campo',
@@ -31,8 +23,7 @@ const detalleHtml = (datos) => `
 const enviarCorreo = async (correoDestino, datos, tipoCalendario) => {
     const nombre = NOMBRES[tipoCalendario]
 
-    await transporter.sendMail({
-        from: `"Calendario de Salidas" <${process.env.EMAIL_USER}>`,
+    await enviarEmail({
         to: correoDestino,
         subject: `Nueva ${nombre} agendada`,
         html: `<h2>Se te agendó una ${nombre}</h2>${detalleHtml(datos)}`
@@ -43,8 +34,7 @@ const enviarCorreo = async (correoDestino, datos, tipoCalendario) => {
 export const enviarRecordatorioCorreo = async (correoDestino, datos, tipoCalendario) => {
     const nombre = NOMBRES[tipoCalendario]
 
-    await transporter.sendMail({
-        from: `"Calendario de Salidas" <${process.env.EMAIL_USER}>`,
+    await enviarEmail({
         to: correoDestino,
         subject: `Recordatorio: mañana tienes una ${nombre}`,
         html: `<h2>Recordatorio de ${nombre}</h2><p>Mañana tienes lo siguiente agendado:</p>${detalleHtml(datos)}`

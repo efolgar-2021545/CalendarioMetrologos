@@ -10,9 +10,10 @@ export const obtenerDirectorio = async () => {
     let respuesta
 
     try {
+        // Espera hasta 70 s porque el servicio de usuarios puede estar despertando
         respuesta = await fetch(`${base}/internal/directorio`, {
             headers: { 'x-internal-key': clave },
-            signal: AbortSignal.timeout(5000)
+            signal: AbortSignal.timeout(70000)
         })
     } catch {
         throw new Error(
@@ -22,7 +23,7 @@ export const obtenerDirectorio = async () => {
 
     if (!respuesta.ok) {
         throw new Error(
-            'El servicio de usuarios rechazó la consulta. Verifica que INTERNAL_API_KEY sea idéntica en ambos .env.'
+            'El servicio de usuarios rechazó la consulta. Verifica que INTERNAL_API_KEY sea idéntica en ambos servicios.'
         )
     }
 
